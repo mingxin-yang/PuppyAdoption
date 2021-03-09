@@ -1,19 +1,51 @@
+/*
+ * Copyright 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.example.androiddevchallenge
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +61,7 @@ const val SELECTED_DOG = "selected_dog"
 const val SELECTED_POSITION = "selected_position"
 const val ADOPTED = "adopted"
 
-class DogDetailActivity:AppCompatActivity() {
+class DogDetailActivity : AppCompatActivity() {
 
     private lateinit var selectedDog: Dog
     private var selectedPosition = 0
@@ -37,10 +69,10 @@ class DogDetailActivity:AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val dog = intent.getParcelableExtra<Dog>(SELECTED_DOG)
-        selectedPosition = intent.getIntExtra(SELECTED_POSITION,0)
-        Log.e("ymx", "onCreate: "+dog)
-        if(dog == null){
-            Toast.makeText(this,"There must be something wrong.",Toast.LENGTH_LONG).show()
+        selectedPosition = intent.getIntExtra(SELECTED_POSITION, 0)
+        Log.e("ymx", "onCreate: " + dog)
+        if (dog == null) {
+            Toast.makeText(this, "There must be something wrong.", Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -67,27 +99,25 @@ class DogDetailActivity:AppCompatActivity() {
                 DisplayDogDetail(dog = selectedDog)
             }
         }
-
     }
 
     override fun onBackPressed() {
         navigateBack()
     }
 
-    private fun navigateBack(){
+    private fun navigateBack() {
         val intent = Intent()
-        intent.putExtra(SELECTED_POSITION,selectedPosition)
-        intent.putExtra(ADOPTED,selectedDog.adopted)
-        setResult(RESULT_OK,intent)
+        intent.putExtra(SELECTED_POSITION, selectedPosition)
+        intent.putExtra(ADOPTED, selectedDog.adopted)
+        setResult(RESULT_OK, intent)
         finish()
     }
 }
 var showConfirmDialog by mutableStateOf(false)
 
-
 @Composable
-fun DisplayDogDetail(dog: Dog){
-    val stateDog by remember { mutableStateOf(dog)}
+fun DisplayDogDetail(dog: Dog) {
+    val stateDog by remember { mutableStateOf(dog) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -117,7 +147,7 @@ fun DisplayDogDetail(dog: Dog){
 }
 
 @Composable
-fun  DogAvatar(avatar: String, name: String){
+fun DogAvatar(avatar: String, name: String) {
     val imageIdentity = GlobalApp.context.resources.getIdentifier(
         avatar, "drawable",
         GlobalApp.context.packageName
@@ -139,13 +169,15 @@ fun  DogAvatar(avatar: String, name: String){
 }
 
 @Composable
-fun AdoptButton(adopted: Boolean){
+fun AdoptButton(adopted: Boolean) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
-    ){
-        Button(onClick = { showConfirmDialog  = true },
-        enabled = !adopted) {
+    ) {
+        Button(
+            onClick = { showConfirmDialog = true },
+            enabled = !adopted
+        ) {
             Text(text = if (adopted) "Adopted" else "Adopt")
         }
     }
@@ -161,7 +193,7 @@ fun DogIntroduction(introduction: String) {
 }
 
 @Composable
-fun AdoptConfirmDialog(dog: Dog){
+fun AdoptConfirmDialog(dog: Dog) {
     AlertDialog(
         onDismissRequest = {
             showConfirmDialog = false
@@ -193,4 +225,3 @@ fun AdoptConfirmDialog(dog: Dog){
         }
     )
 }
-

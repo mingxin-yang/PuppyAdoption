@@ -24,11 +24,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -39,29 +51,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
-import com.example.androiddevchallenge.ui.theme.MyTheme
 import androidx.lifecycle.ViewModelProvider
 import com.example.androiddevchallenge.extension.Shadow
 import com.example.androiddevchallenge.model.Dog
+import com.example.androiddevchallenge.ui.theme.MyTheme
 import com.example.androiddevchallenge.util.Resource
 
-
 class MainActivity : AppCompatActivity() {
-    private val viewModel by lazy{
-        ViewModelProvider(this,MainViewModelFactory()).get(MainViewModel::class.java)
+    private val viewModel by lazy {
+        ViewModelProvider(this, MainViewModelFactory()).get(MainViewModel::class.java)
     }
 
     private val startForResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
-            if(result.resultCode == Activity.RESULT_OK){
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.let {
-                    val adopted = it.getBooleanExtra(ADOPTED,false)
-                    val position = it.getIntExtra(SELECTED_POSITION,0)
-                    if(adopted){
+                    val adopted = it.getBooleanExtra(ADOPTED, false)
+                    val position = it.getIntExtra(SELECTED_POSITION, 0)
+                    if (adopted) {
                         viewModel.setDogAdopted(position)
                     }
                 }
@@ -71,26 +81,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyTheme {
-                Scaffold (
+                Scaffold(
                     topBar = {
                         TopAppBar(
                             title = {
-                                    Text(text = getString(R.string.app_name),)
+                                Text(text = getString(R.string.app_name),)
                             },
                             backgroundColor = Color.Transparent, elevation = 0.dp
                         )
                     }
-                ){
-                    DisplayDogList(dogsLiveData = viewModel.dogsLiveData){position, dog ->
-                        Intent(this,DogDetailActivity::class.java) .apply {
-                            putExtra(SELECTED_POSITION,position)
-                            putExtra(SELECTED_DOG,dog)
+                ) {
+                    DisplayDogList(dogsLiveData = viewModel.dogsLiveData) { position, dog ->
+                        Intent(this, DogDetailActivity::class.java).apply {
+                            putExtra(SELECTED_POSITION, position)
+                            putExtra(SELECTED_DOG, dog)
                             startForResult.launch(this)
                         }
-
                     }
                 }
-
             }
         }
         viewModel.readAndParseData()
@@ -100,20 +108,20 @@ class MainActivity : AppCompatActivity() {
 @Composable
 fun DisplayDogList(
     dogsLiveData: LiveData<Resource<List<Dog>>>,
-    onClick: (position: Int,dog: Dog) -> Unit
-){
+    onClick: (position: Int, dog: Dog) -> Unit
+) {
     val resource by dogsLiveData.observeAsState()
-    resource?.let{
-        when(it.status){
-            Resource.SUCCESS ->{
-                it.data?.let{ dogs ->
+    resource?.let {
+        when (it.status) {
+            Resource.SUCCESS -> {
+                it.data?.let { dogs ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp, bottom = 8.dp)
-                    ){
-                        LazyColumn(Modifier.fillMaxWidth()){
-                            itemsIndexed(dogs){position,dog->
+                    ) {
+                        LazyColumn(Modifier.fillMaxWidth()) {
+                            itemsIndexed(dogs) { position, dog ->
                                 run {
                                     DisplayDogItem(position, dog, onClick)
                                 }
@@ -122,7 +130,7 @@ fun DisplayDogList(
                     }
                 }
             }
-            Resource.LOADING ->{
+            Resource.LOADING -> {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -132,7 +140,7 @@ fun DisplayDogList(
                     CircularProgressIndicator()
                 }
             }
-            else ->{
+            else -> {
                 Toast.makeText(
                     GlobalApp.context,
                     "Failed to get dogs data. ${it.message}",
@@ -143,7 +151,7 @@ fun DisplayDogList(
     }
 }
 @Composable
-fun DisplayDogItem(position: Int,dog: Dog,onClick: (position: Int, dog: Dog) -> Unit){
+fun DisplayDogItem(position: Int, dog: Dog, onClick: (position: Int, dog: Dog) -> Unit) {
     Card(
         elevation = 4.dp,
         shape = RoundedCornerShape(4.dp),
@@ -158,7 +166,7 @@ fun DisplayDogItem(position: Int,dog: Dog,onClick: (position: Int, dog: Dog) -> 
 }
 
 @Composable
-fun CardItem(name: String,avatar:String){
+fun CardItem(name: String, avatar: String) {
     val imageIdentity = GlobalApp.context.resources.getIdentifier(
         avatar, "drawable",
         GlobalApp.context.packageName
@@ -187,29 +195,5 @@ fun CardItem(name: String,avatar:String){
                 modifier = Modifier.padding(8.dp)
             )
         }
-    }
-}
-
-// Start building your app here!
-@Composable
-fun MyApp() {
-    Surface(color = MaterialTheme.colors.background) {
-        Text(text = "Ready... Set... GO!")
-    }
-}
-
-@Preview("Light Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun LightPreview() {
-    MyTheme {
-        MyApp()
-    }
-}
-
-@Preview("Dark Theme", widthDp = 360, heightDp = 640)
-@Composable
-fun DarkPreview() {
-    MyTheme(darkTheme = true) {
-        MyApp()
     }
 }
